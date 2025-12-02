@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html class="no-js" lang="id">
+  <head>
+    <!--
+      index.html - PUSAKA (BPS Kabupaten Lamongan)
+      Perubahan utama: font-awesome ditambahkan, sosmed diposisikan tepat di bawah teks BPS,
+      tombol search dibuat fungsional untuk mencari seluruh teks di halaman (highlight #FFF176),
+      map iframe dikembalikan di footer.
+    -->
+
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>PUSAKA - BPS Kabupaten Lamongan</title>
+    <meta name="description" content="Kumpulan Situs, Aplikasi, dan Kegiatan BPS Kabupaten Lamongan" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-beta1.min.css" />
+    <link rel="stylesheet" href="assets/css/LineIcons.2.0.css" />
+    <link rel="stylesheet" href="assets/css/tiny-slider.css" />
+    <link rel="stylesheet" href="assets/css/animate.css" /> 
+    <link rel="stylesheet" href="assets/css/lindy-uikit.css" />
+
+    <!-- Font Awesome (diperlukan untuk ikon sosmed: facebook, instagram, X, youtube) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+      /* =========================
+         General & layout styles
+         ========================= */
+
+      /* Navbar sticky */
+      .navbar-area {
+        position: fixed;       /* agar bagian navbar frezee */
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 999;
+        background: white;
+      }
+
+      /* beri padding-top agar konten tidak tertutup navbar */
+      body { padding-top: 120px; }
+
+      /* Hero */
+      .hero-section { padding: 60px 0 40px; }
+      .hero-content-wrapper h1 { font-size: 36px; }
+      .hero-content-wrapper h2 { font-size: 50px; }
+      .hero-content-wrapper p { font-size: 16px; }
+      .hero-image img { width: 80%; max-width: 420px; }
+
+      /* tombol utama */
+      .btn-highlight {
+        background-color: #FBB040;
+        border: none;
+        color: #fff;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+      .btn-highlight:hover {
+        background-color: #F6762E;
+        transform: scale(1.05);
+        color: white;
+      }
+
+      /* animasi masuk */
+      @keyframes fadeInUpCustom {
+        from {opacity: 0; transform: translateY(60px) scale(0.9);}       /* SACLE Mengatur ukuran elemen menjadi 90% dari ukuran normal (lebih kecil sedikit) */
+        to {opacity: 1; transform: translateY(0) scale(1);}
+      }
+      .animate-up { opacity: 0; animation: fadeInUpCustom 1.2s ease-out forwards; }
+      .delay-1 { animation-delay: 0.2s; }
+      .delay-2 { animation-delay: 0.4s; }
+      .delay-3 { animation-delay: 0.6s; }
+      .delay-4 { animation-delay: 0.8s; }
+      .delay-5 { animation-delay: 1s; }
+
+      /* Sekilas PUSAKA */
+      .about-section {
+        position: relative;
+        padding: 40px 0;       /* Jarak bagian atas & bawah 40px, kiri & kanan 0 */
+        background: linear-gradient(135deg, #ffffff 0%, #f7f8ff 40%, #eaf1ff 100%);
+        overflow: hidden;       /* Menyembunyikan elemen yang keluar dari area section */
+      }
+      .about-section .container { position: relative; z-index: 2; }
+      .about-section h2 { font-size: 28px; }
+
+      /* Ornamen */
+      .ornamen-biru { position: absolute; width: 200px; height: 200px; background: #007bff; border-radius: 50%; opacity: 0.2; z-index: 0; transition: all 0.3s ease; }
+      .ornamen-titik { position: absolute; width: 100px; height: 100px; background: radial-gradient(circle, #007bff 2px, transparent 3px); background-size: 10px 10px; opacity: 0.3; z-index: 0; }
+      .ornamen-biru.kiri { left: 30px; bottom: -40px; }
+      .ornamen-titik.kiri { left: 50px; bottom: 20px; }
+      .ornamen-biru.kanan { right: 30px; top: -40px; }
+      .ornamen-titik.kanan { right: 50px; top: 20px; }
+
+      .about-box { background: #fff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); padding: 20px; z-index: 1; }
+      .about-video iframe { border-radius: 10px; width: 100%; height: 300px; }
+
+      /* Employee flip */
+      .employees { width: 120px; height: 120px; margin: 0 auto; perspective: 1000px; display: flex; align-items: center; justify-content: center; cursor: pointer; }      
+      .employee-frame { width: 100%; height: 100%; border-radius: 18px; box-shadow: 0 6px 12px rgba(0,0,0,0.15); position: relative; transform-style: preserve-3d !important; transition: transform 0.9s cubic-bezier(.2,.9,.3,1); overflow: hidden; border: 4px solid rgba(255,255,255,0.45); background-color: #f8f9fa; }
+      .employees:hover .employee-frame { transform: rotateY(180deg) !important; }
+      .employee-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+      .employee-face.front { transform: rotateY(0deg); z-index: 3; }
+      .employee-face.back { transform: rotateY(180deg); background: linear-gradient(135deg, #ff7bbd 0%, #ffb0d8 100%) !important; display: block; width: 100%; height: 100%; opacity: 1 !important; z-index: 2 !important; border-radius: 18px !important; }
+      .employees:hover .employee-face.front { opacity: 0 !important; }
+      .employee-face img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 14px; }
+      .employees:hover .employee-face.back { opacity: 100 !important; }
+
+      /* Popup */
+      #employeePopupOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+      .employee-popup { width: 380px; max-width: 92%; background: #fff; border-radius: 12px; padding: 14px; box-shadow: 0 12px 30px rgba(0,0,0,0.35); text-align: center; animation: popupIn .18s ease-out; }
+      .employee-popup img { width: 100%; height: auto; border-radius: 10px; display: block; margin-bottom: 10px; }
+      .employee-popup .emp-name { font-weight: 700; color: #222; margin-bottom: 6px; }
+      .employee-popup .emp-role { font-size: 13px; color: #666; margin-bottom: 12px; }
+      .employee-popup .btn-close { display: inline-block; padding: 14px 28px !important; background: #F6762E !important; border: none !important; border-radius: 12px !important; color: #fff !important; font-weight: 700 !important; font-size: 20px !important; line-height: 1.2 !important; min-width: 120px !important; text-align: center; }
+
+      @keyframes popupIn { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+      .footer { padding: 40px 0; }
+      .footer .footer-info { display: flex; align-items: center; justify-content: center; gap: 15px; text-align: left; }
+      .footer .footer-info img { width: 80px; height: auto; }
+
+      @media (max-width: 768px) {
+        .about-video iframe { height: 220px; }
+        .footer .footer-info { flex-direction: column; text-align: center; }
+        .footer .footer-info img { margin-bottom: 10px; }
+      }
+
+      /* Canvas background */
+      #liquid-background { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+      /* Social icons styling (footer) */
+      .social-icons a { color: #bfc8da; font-size: 24px; margin-right: 15px; transition: .3s; }
+      .social-icons a:hover { color: #dbd4bc; transform: scale(1.2); }
+
+      /* =========================
+         SEARCH HIGHLIGHTING
+         ========================= */
+
+      /* class applied to matched text spans */
+      .search-highlight {
+        background: #FFF176; /* A1: kuning terang */
+        padding: 0 2px;
+        border-radius: 2px;
+      }
+
+      /* small visual for "no results" message (optional) */
+      .search-no-results {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: rgba(0,0,0,0.75);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        z-index: 3000;
+        font-size: 14px;
+      }
+
+      /* =========================
+   FIX NAVBAR MENU MODEL – seperti contoh user
+   ========================= */
+#nav6 .nav-item {
+  margin-right: 12px;
+}
+
+#nav6 .nav-link {
+  padding: 6px 18px !important;
+  border-radius: 14px !important;       /* kotak tumpul */
+  background: rgba(120, 60, 255, 0.10); /* ungu pastel */
+  color: #6c2bd9 !important;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+#nav6 .nav-link:hover {
+  background: rgba(120, 60, 255, 0.20);
+}
+
+#nav6 .nav-link.active {
+  background: #6c2bd9 !important;
+  color: white !important;
+}
+
+    </style>
+
+    <!-- =========================
+         ADDITIONAL STYLES FOR LOGIN POPUP (Pastel theme)
+         These styles are added only (do not replace any original styles)
+       ========================= -->
+    <style>
+      /* Overlay modal */
+      #loginModal {
+        position: fixed;
+        inset: 0;
+        background: rgba(10,10,10,0.35);
+        display: none; /* default hidden, JS will show if not logged in */
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+        backdrop-filter: blur(4px);
+      }
+
+      /* Card container */
+      .login-card {
+        width: 900px;
+        max-width: 95%;
+        display: flex;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 20px 45px rgba(60,60,80,0.12);
+        background: #ffffff;
+        animation: loginFade .36s ease-out;
+      }
+
+      /* Left illustration */
+      .login-left {
+        flex: 1;
+        min-width: 320px;
+        background: linear-gradient(135deg, #fff0f2 0%, #f6f1ff 50%, #e6fbff 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 36px;
+      }
+
+      .login-left img {
+        width: 100%;
+        max-width: 380px;
+      }
+
+      /* Right form */
+      .login-right {
+        flex: 1;
+        padding: 40px 48px;
+        background: linear-gradient(0deg, #ffffff 0%, #fffafc 100%);
+      }
+
+      .login-head {
+        font-size: 28px;
+        font-weight: 800;
+        color: #ff9fb2; /* pastel peach */
+        margin-bottom: 6px;
+        text-align: center;
+      }
+
+      .login-sub {
+        text-align: center;
+        color: #7a7a8a;
+        font-size: 14px;
+        margin-bottom: 22px;
+      }
+
+      .login-field {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid rgba(220,185,212,0.9);
+        padding: 12px 8px;
+        margin-bottom: 18px;
+        font-size: 15px;
+        background: transparent;
+        border-radius: 6px;
+      }
+
+      .login-field:focus {
+        outline: none;
+        border-bottom-color: #ff9fb2;
+      }
+
+      .login-cta {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .btn-primary-login {
+        flex: 1;
+        padding: 12px 18px;
+        border-radius: 12px;
+        border: none;
+        background: linear-gradient(90deg,#ffd1d1,#ffd7f0);
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .btn-primary-login:hover { transform: translateY(-2px); filter: brightness(.98); }
+
+      .login-footer {
+        margin-top: 16px;
+        text-align: center;
+        color: #9b9bb0;
+        font-size: 13px;
+      }
+
+      /* small screens */
+      @media (max-width: 880px) {
+        .login-card { flex-direction: column; width: 92%; }
+        .login-left { display: none; } /* hide illustration on very small screens */
+      }
+
+      @keyframes loginFade {
+        from { opacity: 0; transform: translateY(20px) scale(.99); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <!-- Canvas (Three.js background) -->
+    <canvas id="liquid-background"></canvas>
+
+    <!-- ========================= HEADER ========================= -->
+    <header class="header header-6">
+      <div class="navbar-area py-2 shadow-sm">
+        <div class="container">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <!-- Logo + Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="#">
+              <img src="assets/img/logo/logo.png" alt="Logo PUSAKA" height="50" class="me-2" />
+              <span class="fw-bold fs-4" style="letter-spacing:1px; color:#3A4BFF;">PUSAKA</span>
+            </a>
+
+            <!-- SEARCH FORM (id untuk JS) -->
+            <form id="searchForm" class="d-flex ms-auto" style="max-width: 300px;">
+              <!--
+                form behavior:
+                - prevented by JS submit handler
+                - JS will search all text nodes in the page and highlight results
+              -->
+              <input id="searchInput" class="form-control form-control-sm me-2" type="search" placeholder="Cari sesuatu..." aria-label="Search">
+              <button id="searchBtn" class="btn btn-warning btn-sm" type="submit">Search</button>
+            </form>
+          </div>
+
+          <!-- Navbar links -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light rounded-3 shadow-sm py-2">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent6" aria-controls="navbarSupportedContent6" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="toggler-icon"></span>
+              <span class="toggler-icon"></span>
+              <span class="toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-center" id="navbarSupportedContent6">
+              <ul id="nav6" class="navbar-nav">
+                <li class="nav-item"><a class="nav-link active" href="index.html">Beranda</a></li>
+                <li class="nav-item"><a class="nav-link" href="Dashboard Anggaran.html">Dashboard Anggaran</a></li>
+                <li class="nav-item"><a class="nav-link" href="keuangan.html">Keuangan</a></li>
+                <li class="nav-item"><a class="nav-link" href="kepegawaian.html">Kepegawaian</a></li>
+                <li class="nav-item"><a class="nav-link" href="download.html">Download KAK</a></li>
+                <li class="nav-item"><a class="nav-link" href="kalender.html">Kalender Translok</a></li>
+                <li class="nav-item"><a class="nav-link" href="kegiatan.html">Kegiatan</a></li>
+              </ul>
+            </div>
+          </nav>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- ========================= HERO SECTION ========================= -->
+    <section id="beranda" class="hero-section hero-style-5 img-bg" style="background-image: url('assets/img/hero/hero-5/hero-bg.svg')">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <div class="hero-content-wrapper animate-up delay-1">
+              <h1 class="mb-20 text-warning">Selamat Datang</h1>
+              <h2 class="mb-30 fw-bold text-uppercase" style="color:#F6762E;">PUSAKA</h2>
+              <p class="mb-30 fw-bold" style="color:#FBB040;">Kumpulan Situs, Aplikasi dan Kegiatan (PUSAKA)</p>
+              <a href="#sekilas" class="btn btn-highlight btn-lg shadow-sm animate-up delay-3">Lihat Detail</a>
+            </div>
+          </div>
+
+          <div class="col-lg-6 text-center animate-up delay-4">
+            <div class="hero-image">
+              <img src="assets/img/hero/hero-5/hero-img.svg" alt="Gedung BPS Lamongan" class="img-fluid rounded-3 shadow" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= SEKILAS PUSAKA ========================= -->
+    <section id="sekilas" class="about-section">
+      <div class="container position-relative">
+        <div class="text-center mb-5 animate-up delay-1">
+          <h2 class="fw-bold text-warning fs-3">Sekilas PUSAKA</h2>
+        </div>
+
+        <div class="ornamen-biru kiri"></div>
+        <div class="ornamen-titik kiri"></div>
+        <div class="ornamen-biru kanan"></div>
+        <div class="ornamen-titik kanan"></div>
+
+        <div class="row g-4">
+          <div class="col-lg-6 animate-up delay-2">
+            <div class="about-box about-video shadow">
+              <iframe src="https://www.youtube.com/embed/WY8tuHRziTY" title="YouTube video player" allowfullscreen></iframe>
+            </div>
+          </div>
+
+          <div class="col-lg-6 animate-up delay-3">
+            <div class="about-box">
+              <h5 class="text-warning fw-bold mb-3">Untuk apa website PUSAKA?</h5>
+              <p>Website ini digunakan untuk mengumpulkan semua layanan yang pernah dibuat oleh BPS Kabupaten Lamongan. Tujuannya untuk memudahkan pengguna dalam mengakses informasi kegiatan dan manajemen dalam mendukung tata kelola yang lebih efektif.</p>
+              <p>Selain itu, website ini juga berisi prototype E-KAK, SK, dan laporan keuangan yang transparan. Diharapkan dengan adanya platform “PUSAKA” dapat membantu pegawai BPS Kabupaten Lamongan dalam menangkap dinamika keuangan.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= EMPLOYEE SECTION ========================= -->
+    <section id="employee" class="bg-primary text-white py-5">
+      <div class="container text-center">
+        <h3 class="fw-bold mb-4 text-warning">Employee of the Quarter</h3>
+
+        <div class="row justify-content-center">
+
+          <div class="col-md-2 col-6 mb-4">
+            <div class="employees" data-role="Pegawai Teladan Triwulan I" data-src="assets/img/employees/employee1neww.png" data-name="">
+              <div class="employee-frame">
+                <div class="employee-face front">
+                  <img src="assets/img/employees/employee1neww.png" alt="Employee 1">
+                </div>
+                <div class="employee-face back"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-2 col-6 mb-4">
+            <div class="employees" data-role="Pegawai Teladan Triwulan II" data-src="assets/img/employees/employee2neww.png" data-name="">
+              <div class="employee-frame">
+                <div class="employee-face front">
+                  <img src="assets/img/employees/employee2neww.png" alt="Employee 2">
+                </div>
+                <div class="employee-face back"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-2 col-6 mb-4">
+            <div class="employees" data-role="Pegawai Teladan Triwulan III" data-src="assets/img/employees/employee3neww.png" data-name="">
+              <div class="employee-frame">
+                <div class="employee-face front">
+                  <img src="assets/img/employees/employee3neww.png" alt="Employee 3">
+                </div>
+                <div class="employee-face back"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-2 col-6 mb-4">     <!-- Mengatur lebar kolom ketika layar ukuran sedang ke atas (tablet/PC), Mengatur lebar kolom ketika layar kecil / HP, Margin bottom 4 (jarak bawah) -->
+            <div class="employees" data-role="Pegawai Teladan Triwulan VI" data-src="assets/img/employees/employee4neww.png">
+              <div class="employee-frame">
+                <div class="employee-face front">
+                  <img src="assets/img/employees/employee4neww.png" alt="Employee 4">
+                </div>
+                <div class="employee-face back"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- POPUP -->
+    <div id="employeePopupOverlay" aria-hidden="true">
+      <div class="employee-popup" role="dialog" aria-modal="true" aria-labelledby="empTitle">
+        <img id="empPopupImg" src="" alt="Employee Foto">
+        <div class="emp-name" id="empTitle">Nama Employee</div>
+        <div class="emp-role" id="empRole">Jabatan</div>
+        <button class="btn-close" id="empCloseBtn">Tutup</button>
+      </div>
+    </div>
+
+    <!-- ========================= bagian bawah ========================= -->
+    <footer class="footer footer-style-4 pt-5">
+      <div class="container">
+        <div class="row align-items-start">
+
+          <!-- BAGIAN KIRI (Logo + Tentang + Sosmed) -->
+          <div class="col-md-6">
+            <!-- Logo + info text -->
+            <div class="d-flex align-items-start mb-1">
+              <img src="assets/img/clients/brands.png" alt="BPS Logo" style="width:70px; height:auto; margin-right:10px; margin-top:20px;">
+              <div>
+                <h5 class="fw-bold mb-2">BPS Kabupaten Lamongan</h5>
+                <p class="mb-1">Jl. Veteran No. 50 Lamongan, Jawa Timur</p>
+                <p class="mb-1">Telepon: (0322) 321796 | Fax: (0322) 324487</p>
+                <p class="mb-0">Email: bps3519@bps.go.id</p>
+
+                <!-- Sosial media (tepat di bawah teks, dengan jarak kecil) -->
+                <div class="social-icons mt-2" style="margin-top:6px;">
+                  <a href="https://www.facebook.com/bps.k.lamongan/" class="text-dark me-2" style="font-size:20px;"><i class="fab fa-facebook"></i></a>
+                  <a href="https://www.instagram.com/bpslamongan/?utm_medium=copy_link" class="text-dark me-2" style="font-size:20px;"><i class="fab fa-instagram"></i></a>
+                  <a href="https://x.com/bpslamongan3524" class="text-dark me-2" style="font-size:20px;"><i class="fa-brands fa-x-twitter"></i></a>
+                  <a href="https://www.youtube.com/c/bpslamongan3524" class="text-dark" style="font-size:20px;"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BAGIAN MAP -->
+          <div class="col-md-4">
+           <div class="ratio ratio-21x9 shadow rounded">
+              <iframe
+                src="https://maps.google.com/maps?q=bps%20kabupaten%20lamongan&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%" height="100%"
+                style="border:0;" allowfullscreen loading="lazy">
+              </iframe>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scroll to top -->
+    <a href="#" class="scroll-top">
+      <i class="lni lni-chevron-up"></i>
+    </a>
+
+    <!-- ========================= JS ========================= -->
+    <script src="assets/js/bootstrap-5.0.0-beta1.min.js"></script>
+    <script src="assets/js/tiny-slider.js"></script>
+    <script src="assets/js/wow.min.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <!-- ========================= POPUP & EMPLOYEE SCRIPT ========================= -->
+    <script>
+      /* Employee popup behavior
+         - overlay: element that dims background and contains popup
+         - popupImg, popupTitle, popupRole: elements inside popup to fill dynamically
+      */
+      (function(){
+        const overlay = document.getElementById('employeePopupOverlay');
+        const popupImg = document.getElementById('empPopupImg');
+        const empTitle = document.getElementById('empTitle');
+        const empRole = document.getElementById('empRole');
+        const empCloseBtn = document.getElementById('empCloseBtn');
+
+        function openEmployeePopup(src, name, role) {
+          popupImg.src = src || '';
+          popupImg.alt = name || 'Employee Foto';
+          empTitle.textContent = name || '';
+          empRole.textContent = role || '';
+          overlay.style.display = 'flex';
+          overlay.setAttribute('aria-hidden', 'false');
+          empCloseBtn.focus();
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeEmployeePopup() {
+          overlay.style.display = 'none';
+          overlay.setAttribute('aria-hidden', 'true');
+          popupImg.src = '';
+          document.body.style.overflow = '';
+        }
+
+        document.querySelectorAll('.employees').forEach(function(el){
+          el.addEventListener('click', function(){
+            const src = el.getAttribute('data-src') || el.querySelector('img')?.src || '';
+            const name = el.getAttribute('data-name') || '';
+            const role = el.getAttribute('data-role') || '';
+            openEmployeePopup(src, name, role);
+          });
+
+          el.addEventListener('keydown', function(e){
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              el.click();
+            }
+          });
+        });
+
+        empCloseBtn.addEventListener('click', closeEmployeePopup);
+
+        overlay.addEventListener('click', function(e){
+          if (e.target === overlay) closeEmployeePopup();
+        });
+
+        document.addEventListener('keydown', function(e){
+          if (e.key === 'Escape' && overlay.style.display === 'flex') {
+            closeEmployeePopup();
+          }
+        });
+
+      })();
+    </script>
+
+    <!-- ========================= SEARCH SCRIPT (highlight & scroll) ========================= -->
+    <script>
+      /*
+        Search implementation overview:
+        - Scans visible text nodes in the document body (excluding script/style)
+        - Wraps matches with a span.search-highlight
+        - Removes previous highlights on new search
+        - Scrolls to first match and focuses it
+        - Highlights all matches
+        - If no match, shows a temporary "tidak ditemukan" message
+      */
+
+      (function(){
+        const form = document.getElementById('searchForm');
+        const input = document.getElementById('searchInput');
+
+        // CSS selector list to ignore while searching (don't search inside these tags)
+        const IGNORE_SELECTORS = ['script','style','noscript','iframe','canvas'];
+
+        // Utility: walk text nodes under an element and run callback for each text node
+        function walkTextNodes(node, callback) {
+          let walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
+            acceptNode: function(n) {
+              // ignore empty or whitespace-only nodes
+              if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+              // ignore nodes whose parent matches ignore selectors
+              let p = n.parentElement;
+              while (p) {
+                if (IGNORE_SELECTORS.includes(p.tagName.toLowerCase())) return NodeFilter.FILTER_REJECT;
+                p = p.parentElement;
+              }
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          }, false);
+
+          let n;
+          while (n = walker.nextNode()) {
+            callback(n);
+          }
+        }
+
+        // Remove any previous highlights
+        function removeHighlights() {
+          const prev = document.querySelectorAll('span.search-highlight');
+          prev.forEach(span => {
+            // unwrap: replace span with its text content
+            const textNode = document.createTextNode(span.textContent);
+            span.parentNode.replaceChild(textNode, span);
+            // normalize parent node to merge adjacent text nodes
+            span.parentNode.normalize();
+          });
+        }
+
+        // Create temporary "not found" message
+        function showNoResults() {
+          const el = document.createElement('div');
+          el.className = 'search-no-results';
+          el.textContent = 'Tidak ditemukan';
+          document.body.appendChild(el);
+          setTimeout(() => {
+            el.remove();
+          }, 1800);
+        }
+
+        // Main highlight function: wraps text matches in spans
+        function highlightMatches(query) {
+          if (!query) return 0;
+          const q = query.trim();
+          if (!q) return 0;
+
+          // prepare regex (escape special chars), case-insensitive
+          const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(escaped, 'gi');
+          let matches = 0;
+
+          // Walk text nodes and replace text parts that match regex
+          walkTextNodes(document.body, function(textNode) {
+            const parent = textNode.parentNode;
+            const text = textNode.nodeValue;
+            let match;
+            let lastIndex = 0;
+            const frag = document.createDocumentFragment();
+            // use while loop to handle multiple matches in same text node
+            while ((match = regex.exec(text)) !== null) {
+              matches++;
+              // text before match
+              const before = text.substring(lastIndex, match.index);
+              if (before) frag.appendChild(document.createTextNode(before));
+              // matched text wrapped in span
+              const span = document.createElement('span');
+              span.className = 'search-highlight';
+              span.textContent = match[0];
+              frag.appendChild(span);
+              lastIndex = match.index + match[0].length;
+            }
+            // remaining text after last match
+            if (lastIndex < text.length) {
+              frag.appendChild(document.createTextNode(text.substring(lastIndex)));
+            }
+            // if there was at least one match, replace the original text node
+            if (matches) {
+              parent.replaceChild(frag, textNode);
+            }
+          });
+
+          return matches;
+        }
+
+        // On submit: do search, highlight, scroll
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const q = input.value;
+          // Remove old highlights first
+          removeHighlights();
+
+          if (!q || !q.trim()) {
+            // if empty, nothing to do
+            return;
+          }
+
+          const found = highlightMatches(q);
+          if (!found) {
+            showNoResults();
+            return;
+          }
+
+          // Scroll to first highlighted element
+          const first = document.querySelector('span.search-highlight');
+          if (first) {
+            first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // briefly focus to help keyboard users
+            first.tabIndex = -1;
+            first.focus();
+            // remove tabindex after a short time to keep DOM clean
+            setTimeout(() => {
+              try { first.removeAttribute('tabindex'); } catch(err) {}
+            }, 1200);
+          }
+        });
+
+        // Optional: clear highlights when input is emptied
+        input.addEventListener('input', function() {
+          if (!this.value) removeHighlights();
+        });
+
+      })();
+    </script>
+
+    <!-- ========================= THREE.JS / Liquid Background ========================= -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script>
+      // Simple Three.js animated sphere used as decorative background
+      (function(){
+        const canvas = document.getElementById('liquid-background');
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        const light = new THREE.PointLight(0xffffff, 1);
+        light.position.set(5,5,5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff,0.3));
+
+        const geometry = new THREE.SphereGeometry(1, 128, 128);
+        const material = new THREE.ShaderMaterial({
+          uniforms: { time: { value: 0.0 } },
+          vertexShader: `
+            uniform float time;
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              vec3 pos = position;
+              float freq = 3.0;
+              float amp = 0.1;
+              pos.x += sin(pos.y * freq + time) * amp;
+              pos.y += cos(pos.x * freq + time) * amp;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
+            }
+          `,
+          fragmentShader: `
+            varying vec2 vUv;
+            void main() {
+              vec3 color = vec3(0.0, 0.5 + 0.5*vUv.y, 1.0);
+              gl_FragColor = vec4(color,1.0);
+            }
+          `
+        });
+
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+
+        const clock = new THREE.Clock();
+        function animate(){
+          requestAnimationFrame(animate);
+          material.uniforms.time.value = clock.getElapsedTime();
+          sphere.rotation.y += 0.002;
+          renderer.render(scene,camera);
+        }
+        animate();
+
+        window.addEventListener('resize', ()=> {
+          camera.aspect = window.innerWidth/window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+      })();
+    </script>
+
+    <!-- =========================
+         START LOGIN POPUP (DITAMBAHKAN - PASTEL THEME)
+         - Saya hanya menambahkan kode berikut ini; kode asli di atas TIDAK diubah.
+       ========================= -->
+
+    <!-- Modal HTML -->
+    <div id="loginModal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="login-card" role="document" aria-label="Login dialog">
+          <div class="login-left" aria-hidden="false">
+        <img src="assets/img/logo/login.png" alt="Login Illustration">
+         </div>
+
+        <div class="login-right">
+          <div class="login-head">Ready to connect with PUSAKA?</div>
+          <div class="login-sub">Silakan masuk atau buat akun terlebih dahulu untuk mengakses halaman ini.</div>
+
+          <label for="loginName" class="visually-hidden">Name</label>
+          <input id="loginName" class="login-field" type="text" placeholder="Enter your name" autocomplete="name">
+
+          <label for="loginEmail" class="visually-hidden">E-mail</label>
+          <input id="loginEmail" class="login-field" type="email" placeholder="Enter your email address" autocomplete="email">
+
+          <label for="loginPassword" class="visually-hidden">Password</label>
+          <input id="loginPassword" class="login-field" type="password" placeholder="Enter your password" autocomplete="password">
+
+          <div class="login-cta">
+            <button class="btn-primary-login" id="btnNext" onclick="handleNext()">Next</button>
+          </div>
+
+          <div id="loginMsg" class="login-footer" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // START LOGIN POPUP SCRIPT (ADDED)
+      (function(){
+        const modal = document.getElementById('loginModal');
+        const msg = document.getElementById('loginMsg');
+
+        // CSV URL (Google Sheet tab "Akun" published as CSV)
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/1Ar3TNwUTYlGlo6lDOQFtpfK1UjRZsrFqXJ5INIuXTKA/gviz/tq?tqx=out:csv&sheet=Akun";
+
+        // Utility: parse CSV line into array (handles commas naively; spreadsheet should not contain commas in fields)
+        function parseCSVLine(line) {
+          // simple split — assumes no quoted commas in CSV cells
+          return line.split(",").map(s => s.trim());
+        }
+
+                    // Show modal automatically every time page loads (do not use localStorage/sessionStorage)
+                  document.addEventListener('DOMContentLoaded', () => {
+              // Jika tab ini sudah login, JANGAN tampilkan popup
+              if (sessionStorage.getItem("isLoggedIn") === "true") {
+                  modal.style.display = 'none';
+                  modal.setAttribute('aria-hidden', 'true');
+                  document.documentElement.style.overflow = '';
+                  document.body.style.overflow = '';
+              } else {
+                  modal.style.display = 'flex';
+                  modal.setAttribute('aria-hidden','false');
+                  document.documentElement.style.overflow = 'hidden';
+                  document.body.style.overflow = 'hidden';
+              }
+            });
+
+
+        // Login handler using CSV from Google Sheet (tab "Akun")
+        window.handleNext = function() {
+          const name = document.getElementById('loginName').value.trim();
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value.trim();
+
+          // basic validation
+          if(!name || !email || !password) {
+            msg.textContent = 'Nama, email, dan password wajib diisi.';
+            return;
+          }
+
+          // simple email format check
+          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if(!re.test(email)) {
+            msg.textContent = 'Masukkan email yang valid.';
+            return;
+          }
+
+          msg.textContent = 'Memeriksa akun...';
+
+          fetch(CSV_URL)
+            .then(response => {
+              if(!response.ok) throw new Error('Network response was not ok');
+              return response.text();
+            })
+            .then(text => {
+              // split lines and skip header
+              const lines = text.trim().split(/\r?\n/);
+              if(lines.length <= 1) {
+                msg.textContent = 'Tidak ada data akun pada CSV.';
+                return;
+              }
+
+              const header = lines[0].split(",").map(h => h.trim().toLowerCase());
+              // Determine column indices (name,email,password) - tolerant of ordering
+              const idxName = header.indexOf('name') !== -1 ? header.indexOf('name') : (header.indexOf('nama') !== -1 ? header.indexOf('nama') : 0);
+              const idxEmail = header.indexOf('email') !== -1 ? header.indexOf('email') : (header.indexOf('e-mail') !== -1 ? header.indexOf('e-mail') : 1);
+              const idxPassword = header.indexOf('password') !== -1 ? header.indexOf('password') : (header.indexOf('pwd') !== -1 ? header.indexOf('pwd') : 2);
+              const idxRole = header.indexOf('role') !== -1 ? header.indexOf('role') : -1;
+
+              let found = false;
+              let foundRole = '';
+
+              for(let i = 1; i < lines.length; i++) {
+                if(!lines[i].trim()) continue;
+                const cols = parseCSVLine(lines[i]);
+                const csvName = (cols[idxName] || '').replace(/^"|"$/g,'').trim();
+                const csvEmail = (cols[idxEmail] || '').replace(/^"|"$/g,'').trim();
+                const csvPassword = (cols[idxPassword] || '').replace(/^"|"$/g,'').trim();
+
+                if(csvName === name && csvEmail === email && csvPassword === password) {
+                  found = true;
+                  if(idxRole !== -1) foundRole = (cols[idxRole] || '').replace(/^"|"$/g,'').trim();
+                  break;
+                }
+              }
+
+                            if(found) {
+                    // simpan sesi login (TAB ONLY)
+                    sessionStorage.setItem("isLoggedIn", "true");
+
+                    msg.textContent = '';
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden','true');
+                    document.documentElement.style.overflow = '';
+                    document.body.style.overflow = '';
+
+                    console.info('Login berhasil:', name);
+                
+
+                console.info('Login berhasil:', name, email, foundRole || 'role:none');
+              } else {
+                msg.textContent = 'Akun tidak ditemukan atau kata sandi salah.';
+              }
+            })
+            .catch(err => {
+              console.error('Error fetching CSV:', err);
+              msg.textContent = 'Gagal memuat data akun. Periksa koneksi atau setelan share Google Sheet.';
+            });
+        };
+
+        // ESC won't close the modal (prevents bypass)
+        document.addEventListener('keydown', function(e){
+          if(e.key === 'Escape') {
+            // prevent closing if modal is open
+            if(modal.style.display === 'flex') {
+              e.preventDefault();
+            }
+          }
+        });
+
+        // Optional: expose logout function globally but do not use localStorage
+        window.logout = function(){
+          // simply reload page so login modal will appear again
+          location.reload();
+        };
+
+      })();
+      // END LOGIN POPUP SCRIPT
+    </script>
+    <!-- ========================= END LOGIN POPUP ========================= -->
+
+  </body>
+</html>

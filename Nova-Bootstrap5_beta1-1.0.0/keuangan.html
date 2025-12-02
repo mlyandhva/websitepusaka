@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Keuangan - PUSAKA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- CSS (tetap sesuai proyek) -->
+    <link rel="stylesheet" href="assets/css/bootstrap-5.0.0-beta1.min.css" />
+    <link rel="stylesheet" href="assets/css/lindy-uikit.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+      :root{
+        --purple:#6a5af9;
+        --purple-dark:#5b49ff;
+
+        /* background gradient (ASLI seperti kode awal) */
+        --bg: linear-gradient(to bottom right,#f5f6ff,#e8eaff);
+
+        /* badge colors */
+        --badge-done-bg:#cfe1ff;
+        --badge-done-text:#1f4fb3;
+        --badge-progress-bg:#dff5cf;
+        --badge-progress-text:#2b7a1a;
+        --badge-pending-bg:#fff1c7;
+        --badge-pending-text:#8a6400;
+      }
+
+      *{box-sizing:border-box}
+      body{
+        margin:0;
+        font-family:"Poppins",sans-serif;
+        background:var(--bg);
+        color:#222;
+        -webkit-font-smoothing:antialiased;
+      }
+
+      /* NAVBAR */
+      .navbar-wrapper {
+        background: linear-gradient(135deg, #ffffff8c, rgba(250,250,255,0.35));
+        backdrop-filter: blur(8px) saturate(120%);       /* Membuat area belakang navbar terlihat buram & lebih berwarna */
+        border-radius: 20px;       /* Membuat sudut membulat */
+        padding: 12px 18px;       /* Biar isi navbar tidak menempel pada pinggir */
+        box-shadow: 0 6px 20px rgba(100,64,255,0.06); /* Supaya navbar terlihat melayang (3D) */
+        margin: 12px auto; /*  Biar isi navbar tidak menempel pada pinggir  */
+        width: 95%;
+        border: 1px solid rgba(255,255,255,0.45);
+      }
+      .navbar-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+      .navbar-title{font-weight:700;color:var(--purple);font-size:18px}
+      .navbar-links{display:flex;gap:8px;flex-wrap:wrap}
+      .navbar-links a{ text-decoration:none; color:var(--purple); padding:6px 12px; border-radius:8px; background: rgba(108,43,217,0.06); border:1px solid rgba(108,43,217,0.06)}
+      .navbar-links a.active{background:var(--purple);color:#fff}
+
+      /* PAGE LAYOUT */
+      .page-container{ padding: 12px 28px 60px 28px; max-width:1100px; margin:0 auto; }
+      .grid {
+        display:grid;
+        grid-template-columns: 1fr 360px;
+        gap: 20px;
+        align-items:start;
+      }
+      .grid > *:only-child { grid-column: 1 / -1; }
+
+      @media (max-width: 992px){
+        .grid{ grid-template-columns: 1fr; }
+      }
+
+      h2.page-title{ font-size:36px; margin:6px 0 12px 0; color:#1f1f1f; font-weight:700; }
+
+      .rekap-space{
+        background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(250,250,255,0.42));
+        border-radius:12px;
+        padding:14px;
+        box-shadow: 0 10px 30px rgba(50,30,120,0.06);
+        backdrop-filter: blur(12px) saturate(120%);
+        border: 1px solid rgba(255,255,255,0.45);
+      }
+
+      .controls-top{ display:flex; justify-content:space-between; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap }
+      .left-controls{ display:flex; gap:8px; align-items:center }
+      .control-btn{
+        width:36px;height:36px;border-radius:8px;border:none;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.06);cursor:pointer;color:var(--purple-dark);font-weight:700;
+      }
+      .search-input{ padding:8px 12px; border-radius:8px; border:1px solid #e6e6e6; min-width:220px; }
+
+      .table-wrap{ overflow-x:auto; }
+      .table-scroll{
+        max-height:420px;
+        overflow-y:auto;
+        border-radius:10px;
+      }
+      table.custom-table{
+        width:100%;
+        border-collapse:separate;
+        border-spacing:0;
+        min-width:680px;
+        background:transparent;
+        font-size:13px;
+      }
+      table.custom-table thead th{
+        background:var(--purple-dark); color:#fff; padding:10px 12px; font-weight:700; position:sticky; top:0; z-index:2; text-align:left;
+      }
+      table.custom-table thead th:first-child{ border-top-left-radius:12px }
+      table.custom-table thead th:last-child{ border-top-right-radius:12px }
+
+      table.custom-table tbody td{ padding:10px 12px; border-bottom:1px solid #eef0f5; background:#fff; vertical-align:middle; line-height:1.2 }
+      table.custom-table tbody tr:nth-child(even) td{ background:#fbfbff }
+      table.custom-table tbody tr:hover td{ background:#f1f5ff }
+
+      .badge{ display:inline-block; padding:6px 12px; border-radius:999px; font-size:13px; font-weight:600; }
+      .badge--done{ background:var(--badge-done-bg); color:var(--badge-done-text) }
+      .badge--progress{ background:var(--badge-progress-bg); color:var(--badge-progress-text) }
+      .badge--pending{ background:var(--badge-pending-bg); color:var(--badge-pending-text) }
+      .badge--neutral{ background:#f1f3f7; color:#475569 }
+
+      .pagination-bar{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; gap:8px; color:#555; font-size:13px; flex-wrap:wrap }
+      .pagination-controls{ display:flex; gap:6px; align-items:center; flex-wrap:wrap }
+      .page-btn{ padding:6px 10px; border-radius:8px; border:1px solid #e6e6e6; background:#fff; cursor:pointer }
+      .page-btn.active{ background:var(--purple); color:#fff; border-color:var(--purple) }
+
+      /* APP GRID: uniform sizing and tidy layout
+         Perubahan hanya pada penataan card agar teks tidak terpotong
+      */
+      .app-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px; margin-top:18px; align-items:start; }
+      .app-card {
+        border-radius:12px;
+        padding:18px 16px 34px; /* bottom padding lebih besar agar tombol tidak mepet */
+        /* default background (keamanan jika nth-child tidak match) */
+        background: linear-gradient(135deg, rgba(255,255,255,0.88), rgba(245,246,255,0.82));
+        box-shadow: 0 8px 22px rgba(93,80,255,0.06);
+        border: 1px solid rgba(255,255,255,0.55);
+        display:flex;
+        flex-direction:column;
+        justify-content:flex-start;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        min-height: 320px;    /* gunakan min-height bukan fixed height */
+        /* hapus max-height jika mau card bisa mengembang sesuai teks */
+        overflow: visible;    /* biarkan konten mengalir sehingga tidak terpotong */
+      }
+      .app-card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(93,80,255,0.09); }
+
+      /* ---------- GRADIENT PASTEL PER CARD (yang kamu minta) ---------- */
+      /* gunakan overlay lembut supaya teks dan tombol masih terbaca */
+      .app-grid .app-card:nth-child(1) {
+        background: linear-gradient(135deg, rgba(255,230,245,0.95), rgba(240,235,255,0.85));
+      }
+      .app-grid .app-card:nth-child(2) {
+        background: linear-gradient(135deg, rgba(255,245,230,0.95), rgba(255,235,235,0.85));
+      }
+      .app-grid .app-card:nth-child(3) {
+        background: linear-gradient(135deg, rgba(235,255,245,0.95), rgba(225,255,250,0.85));
+      }
+      .app-grid .app-card:nth-child(4) {
+        background: linear-gradient(135deg, rgba(240,240,255,0.95), rgba(235,250,255,0.85));
+      }
+      .app-grid .app-card:nth-child(5) {
+        background: linear-gradient(135deg, rgba(255,250,235,0.95), rgba(245,255,235,0.85));
+      }
+      .app-grid .app-card:nth-child(6) {
+        background: linear-gradient(135deg, rgba(255,240,245,0.95), rgba(245,235,255,0.85));
+      }
+      .app-grid .app-card:nth-child(7) {
+        background: linear-gradient(135deg, rgba(235,245,255,0.95), rgba(225,240,255,0.85));
+      }
+      .app-grid .app-card:nth-child(8) {
+        background: linear-gradient(135deg, rgba(245,255,250,0.95), rgba(250,245,255,0.85));
+      }
+      /* for any additional cards beyond 8, keep the default soft background but slightly tinted */
+      .app-grid .app-card:nth-child(n+9) {
+        background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(245,246,255,0.86));
+      }
+      /* ---------------------------------------------------------------- */
+
+      /* Uniform logo area */
+      .app-card .logo-wrap { height:92px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+      .app-card .logo-wrap img { width:92px; height:92px; object-fit:contain; display:block; }
+
+      .app-card h5{ margin:6px 0 8px 0; font-size:16px; color:#222; min-height:44px; }
+      .app-card p{ font-size:13px; color:#555; margin:0 0 18px 0; line-height:1.35; /* fleksibel */ flex-grow:1; }
+
+      /* Button spacing - ensure not touching bottom and aligned consistently */
+      .app-card .btn { text-decoration:none; padding:10px 16px; border-radius:8px; color:#fff; display:inline-block; margin-top:18px; align-self:flex-start; }
+
+      /* on small screens make button centered for nicer look */
+      @media (max-width:600px){
+        .app-card .btn { align-self:center; }
+      }
+
+      /* scrollbar */
+      .table-scroll::-webkit-scrollbar{ width:8px }
+      .table-scroll::-webkit-scrollbar-thumb{ background:rgba(0,0,0,0.12); border-radius:8px }
+
+      .muted { color:#666; font-size:13px }
+      .top-right-actions { display:flex; gap:8px; align-items:center }
+    </style>
+  </head>
+
+  <body>
+   <header>
+  <div class="navbar-wrapper">
+    <div class="navbar-top">
+
+      <!-- LOGO + PUSAKA -->
+      <div style="display:flex; align-items:center;">
+        <img src="assets/img/logo/logo.png" class="navbar-title" alt="Logo BPS Lamongan" style="height:45px; margin:0; padding:0;">
+        <span class="fw-bold fs-4" style="letter-spacing:1px; color:#3A4BFF;">PUSAKA</span>
+      </div>
+
+      <!-- NAV LINKS -->
+      <div class="navbar-links">
+        <a href="index.html">Beranda</a>
+        <a href="dashboard anggaran.html">Dashboard Anggaran</a>
+        <a href="keuangan.html" class="active">Keuangan</a>
+        <a href="kepegawaian.html">Kepegawaian</a>
+        <a href="download.html">Download KAK</a>
+        <a href="kalender.html">Kalender Translok</a>
+        <a href="kegiatan.html">Kegiatan</a>
+      </div>
+
+    </div>
+  </div>
+</header>
+
+    <main class="page-container">
+      <h2 class="page-title">Rekap Pembayaran 2024</h2>
+
+      <div class="grid">
+        <!-- MAIN CONTENT -->
+        <section>
+          <div class="rekap-space">
+            <div class="controls-top">
+              <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+                <div class="left-controls">
+                  <button id="btnAdd" class="control-btn" title="Tambah rows per page">+</button>
+                  <button id="btnRemove" class="control-btn" title="Kurangi rows per page">−</button>
+                  <div style="margin-left:8px;font-size:13px;color:#555">Rows per page: <strong id="rowsPerPageLabel">10</strong></div>
+                </div>
+
+                <div class="top-right-actions">
+                  <button id="btnRefresh" class="page-btn" title="Refresh sekarang"><i class="fa fa-sync"></i> Refresh</button>
+                  <div class="muted" id="lastUpdatedLabel">—</div>
+                </div>
+              </div>
+
+              <div style="margin-left:auto">
+                <input id="searchInput" class="search-input" type="text" placeholder="Cari uraian / status / no..." />
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <div class="table-scroll">
+                <table class="custom-table" aria-label="Tabel Rekap Pembayaran">
+                  <thead>
+                    <tr>
+                      <th style="width:90px">No</th>
+                      <th>Uraian Pembayaran</th>
+                      <th style="width:170px">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody">
+                    <!-- diisi JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="pagination-bar" style="margin-top:10px">
+                <div id="pageSummary">Memuat...</div>
+                <div class="pagination-controls" id="paginationControls">
+                  <!-- tombol halaman akan di-insert di sini -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- APP CARDS (UKURAN SERAGAM, TULISAN TIDAK KEPOTONG, TOMBOL JARAK NYAMAN) -->
+          <div class="app-grid" id="appsList">
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/sakti.png" alt="Sakti" /></div>
+              <h5>Sakti (Sistem Aplikasi Keuangan Tingkat Instansi)</h5>
+              <p>
+                Aplikasi yang digunakan sebagai sarana bagi satker dalam mendukung implementasi SPAN untuk melakukan pengelolaan
+                keuangan yang meliputi tahapan perencanaan hingga pertanggungjawaban anggaran.
+              </p>
+              <a href="https://sakti.kemenkeu.go.id/LL-Zg7BviiuXviBn9TvfiA" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/emonev.png" alt="eMonev" /></div>
+              <h5>eMONEV</h5>
+              <p>
+                Aplikasi e-Monev adalah aplikasi pelaporan data realisasi hasil pemantauan pelaksanaan rencana kerja Kementerian lembaga
+                (Renja K/L) yang pemanfaatannya akan digunakan kembali secara berjenjang dalam kerangka, pemantauan, pengendalian, dan evaluasi.
+              </p>
+              <a href="https://e-monev.bappenas.go.id/portal/" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/sifonda.png" alt="SiFonda" /></div>
+              <h5>SiFonda (Sistem Informasi FOrm peNgaDAan) 2024</h5>
+              <p>
+                SiFonda adalah aplikasi untuk mencatat pengadaan yang dilakukan BPS Kabupaten Lamongan. Dalam SiFonda mencakup Nomor RUP,
+                Jenis Pengadaan dan Nilai Pengadaan.
+              </p>
+              <a href="https://docs.google.com/spreadsheets/d/1O_jHtvDmi2TLLhIIpHoXzfO_r0dnNbURBHES3WYFiuU/edit?gid=0#gid=0" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/monsakti.png" alt="MonSakti" /></div>
+              <h5>MonSakti (Monitoring Sistem Aplikasi Keuangan Tingkat Instansi)</h5>
+              <p>
+                Aplikasi yang digunakan untuk monitoring interkoneksi, rekonsiliasi, dan penyusunan Laporan Keuangan.
+              </p>
+              <a href="https://monsakti.kemenkeu.go.id/dist/app/" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/spi.png" alt="SPI" /></div>
+              <h5>SPI Online</h5>
+              <p>
+                Merupakan aplikasi yang digunakan untuk mengupload LPJ, BAR, PNBP, Laporan BMN, Laporan Persediaan dan Laporan Keuangan setiap
+                bulannya.
+              </p>
+              <a href="https://sso.bps.go.id/auth/realms/pegawai-bps/protocol/openid-connect/auth?state=d49595dfed710b059dd479d9cdee2dab&scope=name%2Cemail&response_type=code&approval_prompt=auto&redirect_uri=https%3A%2F%2Fspi.bps.go.id%2Fv2%2Fapp&client_id=03340-spi-k4k" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/lpse.png" alt="LPSE" /></div>
+              <h5>LPSE (Lembaga Kebijakan Pengadaan Barang/Jasa Pemerintah)</h5>
+              <p>
+                LPSE merupakan layanan pengelolaan teknologi informasi untuk memfasilitasi pelaksanaan Pengadaan Barang/Jasa secara elektronik.
+              </p>
+              <a href="https://lpse.bps.go.id/eproc4" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/erikka2024.png" alt="Erikka 2024" /></div>
+              <h5>Erikka (Elektronik RIncian Kertas Kerja BPS Lamongan) 2024</h5>
+              <p>
+                Spreadsheet ini berisi tentang POK dan DIPA termasuk usulan Revisi POK dan DIPA. Selain itu juga mengakomodir Rencana Penarikan Dana tiap bulannya.
+              </p>
+              <a href="https://docs.google.com/spreadsheets/d/1IhgycAn_u0hh-9M1eVI1JkMVPtwpa4uZR8qO1mFMU/edit?gid=496962774#gid=496962774" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+            <div class="app-card">
+              <div class="logo-wrap"><img src="assets/img/clients/erikka2025.png" alt="Erikka 2025" /></div>
+              <h5>Erikka (Elektronik RIncian Kertas Kerja BPS Lamongan) 2025</h5>
+              <p>
+                Spreadsheet ini berisi tentang POK dan DIPA termasuk usulan Revisi POK dan DIPA. Selain itu juga mengakomodir Rencana Penarikan Dana tiap bulannya.
+              </p>
+              <a href="https://docs.google.com/spreadsheets/d/1k7qZU9mlN4vzrPVkV3uwlEPkya1UWrpmK6Xa97BWEg/edit?gid=720952611#gid=720952611" target="_blank" class="btn" style="background: var(--purple);">Aplikasi</a>
+            </div>
+
+          </div>
+          <!-- END APP CARDS -->
+
+        </section>
+
+        <!-- Sidebar intentionally omitted -->
+      </div>
+    </main>
+
+    <!-- SCRIPT: load data from published CSV, search, pagination, controls -->
+    <script>
+      (function () {
+        /*************************************************************************
+         CONFIG, untuk mengatur link sheet
+        **************************************************************************/
+        const sheetCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTYfo9PxkJU6lZmKZu8nlxTXmeoynNYBMgDg5_OI5a5trMF49gpljsfsSZMogS5mwUDnMbW7geDUEMQ/pub?gid=1514510681&single=true&output=csv";
+        const pollIntervalMs = 7000; // polling tiap 7 detik
+
+        // DOM
+        const tableBody = document.getElementById("tableBody");
+        const searchInput = document.getElementById("searchInput");
+        const pageSummary = document.getElementById("pageSummary");
+        const paginationControls = document.getElementById("paginationControls");
+        const rowsPerPageLabel = document.getElementById("rowsPerPageLabel");
+        const btnAdd = document.getElementById("btnAdd");
+        const btnRemove = document.getElementById("btnRemove");
+        const btnRefresh = document.getElementById("btnRefresh");
+        const lastUpdatedLabel = document.getElementById("lastUpdatedLabel");
+
+        // STATE
+        let dataGlobal = [];
+        let filtered = [];
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let lastFetchedText = null;
+        let pollTimer = null;
+
+        rowsPerPageLabel.innerText = rowsPerPage;
+
+        // CSV parser (robust)
+        function parseCSV(text) {
+          const rows = [];
+          let cur = '';
+          let row = [];
+          let i = 0;
+          let inQuotes = false;
+          while (i < text.length) {
+            const ch = text[i];
+            if (inQuotes) {
+              if (ch === '"') {
+                if (i + 1 < text.length && text[i + 1] === '"') {
+                  cur += '"';
+                  i += 2;
+                  continue;
+                } else {
+                  inQuotes = false;
+                  i++;
+                  continue;
+                }
+              } else {
+                cur += ch;
+                i++;
+                continue;
+              }
+            } else {
+              if (ch === '"') {
+                inQuotes = true;
+                i++;
+                continue;
+              }
+              if (ch === ',') {
+                row.push(cur);
+                cur = '';
+                i++;
+                continue;
+              }
+              // newline support: \r\n or \n or \r
+              if (ch === '\r') {
+                if (i + 1 < text.length && text[i + 1] === '\n') i++;
+                row.push(cur);
+                rows.push(row);
+                row = [];
+                cur = '';
+                i++;
+                continue;
+              }
+              if (ch === '\n') {
+                row.push(cur);
+                rows.push(row);
+                row = [];
+                cur = '';
+                i++;
+                continue;
+              }
+              // normal char
+              cur += ch;
+              i++;
+            }
+          }
+          // push remaining
+          if (inQuotes) {
+            // unterminated quotes — still push what we have
+            row.push(cur);
+            rows.push(row);
+          } else if (cur !== '' || row.length > 0) {
+            row.push(cur);
+            rows.push(row);
+          }
+          // convert to objects using header
+          if (rows.length === 0) return [];
+          const headers = rows[0].map(h => h ? h.trim() : '');
+          const result = [];
+          for (let r = 1; r < rows.length; r++) {
+            const rr = rows[r];
+            // skip empty trailing rows (all empty)
+            const allEmpty = rr.every(cell => (cell ?? '').trim() === '');
+            if (allEmpty) continue;
+            const obj = {};
+            for (let c = 0; c < headers.length; c++) {
+              const key = headers[c] || `col${c}`;
+              obj[key] = typeof rr[c] !== 'undefined' ? rr[c] : '';
+            }
+            result.push(obj);
+          }
+          return result;
+        }
+
+        function getFieldValue(obj, keyCandidates) {
+          if (!obj) return "";
+          if (!Array.isArray(keyCandidates)) keyCandidates = [keyCandidates];
+          for (const key of keyCandidates) {
+            if (!key) continue;
+            if (key in obj) return obj[key];
+            const found = Object.keys(obj).find(k => k && k.trim().toLowerCase() === String(key).trim().toLowerCase());
+            if (found) return obj[found];
+          }
+          return "";
+        }
+
+        function escapeHtml(s) {
+          return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+
+        function renderStatusBadge(raw) {
+          const s = (raw || "").toString().trim();
+          const sLow = s.toLowerCase();
+
+//status keuangan 
+          if (!s || s === "-" || s === "n/a") return `<span class="badge badge--neutral">-</span>`;
+          if (sLow.includes("sudah terbayar") || sLow.includes("terbayar") || sLow.includes("lunas") || sLow.includes("selesai")) {
+            return `<span class="badge badge--done">${escapeHtml(s)}</span>`;
+          }
+          if (sLow.includes("sedang") || sLow.includes("diproses") || sLow.includes("proses") || sLow.includes("on process") || sLow.includes("progress")) {
+            return `<span class="badge badge--progress">${escapeHtml(s)}</span>`;
+          }
+          if (sLow.includes("pending") || sLow.includes("belum") || sLow.includes("tunda") || sLow.includes("menunggu")) {
+            return `<span class="badge badge--pending">${escapeHtml(s)}</span>`;
+          }
+          return `<span class="badge badge--neutral">${escapeHtml(s)}</span>`;
+        }
+
+        function renderTable() {
+          tableBody.innerHTML = "";
+          const totalRows = filtered.length;
+          const totalPages = Math.max(1, Math.ceil(totalRows / rowsPerPage));
+          if (currentPage > totalPages) currentPage = totalPages;
+
+          const start = (currentPage - 1) * rowsPerPage;
+          const pageData = filtered.slice(start, start + rowsPerPage);
+
+          if (pageData.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#999;padding:18px">Tidak ada data</td></tr>`;
+          } else {
+            pageData.forEach((row, idx) => {
+              // untuk merombak data navbar tabel, (favor No column if present)
+              const nomorCol = getFieldValue(row, ["No","no","Nomor","nomor"]);
+              const nomor = nomorCol || (start + idx + 1);
+              const uraian = getFieldValue(row, ["Uraian Pembayaran", "Uraian", "Keterangan"]) || "-";
+              const statusRaw = getFieldValue(row, ["Status", "status"]) || "-";
+
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
+                <td>${escapeHtml(nomor)}</td>
+                <td>${escapeHtml(uraian)}</td>
+                <td>${renderStatusBadge(statusRaw)}</td>
+              `;
+              tableBody.appendChild(tr);
+            });
+          }
+
+          // update summary
+          const showingFrom = totalRows === 0 ? 0 : start + 1;
+          const showingTo = totalRows === 0 ? 0 : start + pageData.length;
+          pageSummary.innerText = `Menampilkan ${showingFrom}–${showingTo} dari ${totalRows} data • Halaman ${currentPage} / ${totalPages}`;
+
+          // build pagination
+          buildPaginationControls(totalPages);
+        }
+
+        function buildPaginationControls(totalPages) {
+          paginationControls.innerHTML = "";
+          if (totalPages <= 1) return;
+
+          const prevBtn = document.createElement("button");
+          prevBtn.className = "page-btn";
+          prevBtn.innerText = "‹";
+          prevBtn.disabled = currentPage === 1;
+          prevBtn.addEventListener("click", () => { currentPage = Math.max(1, currentPage - 1); renderTable(); });
+          paginationControls.appendChild(prevBtn);
+
+          const maxButtons = 7;
+          let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+          let end = Math.min(totalPages, start + maxButtons - 1);
+          if (end - start < maxButtons - 1) start = Math.max(1, end - maxButtons + 1);
+
+          if (start > 1) {
+            paginationControls.appendChild(makePageButton(1));
+            if (start > 2) {
+              const dots = document.createElement("span"); dots.style.padding = "0 6px"; dots.innerText = "...";
+              paginationControls.appendChild(dots);
+            }
+          }
+
+          for (let p = start; p <= end; p++) {
+            paginationControls.appendChild(makePageButton(p));
+          }
+
+          if (end < totalPages) {
+            if (end < totalPages - 1) {
+              const dots = document.createElement("span"); dots.style.padding = "0 6px"; dots.innerText = "...";
+              paginationControls.appendChild(dots);
+            }
+            paginationControls.appendChild(makePageButton(totalPages));
+          }
+
+          const nextBtn = document.createElement("button");
+          nextBtn.className = "page-btn";
+          nextBtn.innerText = "›";
+          nextBtn.disabled = currentPage === totalPages;
+          nextBtn.addEventListener("click", () => { currentPage = Math.min(totalPages, currentPage + 1); renderTable(); });
+          paginationControls.appendChild(nextBtn);
+        }
+
+        function makePageButton(p) {
+          const btn = document.createElement("button");
+          btn.className = "page-btn" + (p === currentPage ? " active" : "");
+          btn.innerText = p;
+          btn.addEventListener("click", () => { currentPage = p; renderTable(); });
+          return btn;
+        }
+
+        // search (debounced)
+        let deb = null;
+        searchInput.addEventListener("input", () => {
+          clearTimeout(deb);
+          deb = setTimeout(() => {
+            applyFilter(searchInput.value || "");
+          }, 180);
+        });
+
+        function applyFilter(qRaw) {
+          const q = (qRaw || "").toString().trim().toLowerCase();
+          if (!q) {
+            filtered = dataGlobal.slice();
+          } else {
+            filtered = dataGlobal.filter(row => {
+              const no= (getFieldValue(row, ["No","Uraian Pembayaran","Status"]) || "").toString().toLowerCase();
+              const uraianpembayaran = (getFieldValue(row, ["Uraian Pembayaran","Uraian Pembayaran"]) || "").toString().toLowerCase();
+              const status = (getFieldValue(row, ["Status","status","Status","status"]) || "").toString().toLowerCase();
+              return no.includes(q) || uraianpembayaran.includes(q) || status.includes(q);
+            });
+          }
+          currentPage = 1;
+          renderTable();
+        }
+
+        // +/- rows
+        btnAdd.addEventListener("click", () => {
+          rowsPerPage = Math.min(200, rowsPerPage + 5);
+          rowsPerPageLabel.innerText = rowsPerPage;
+          currentPage = 1;
+          renderTable();
+        });
+        btnRemove.addEventListener("click", () => {
+          rowsPerPage = Math.max(5, rowsPerPage - 5);
+          rowsPerPageLabel.innerText = rowsPerPage;
+          currentPage = 1;
+          renderTable();
+        });
+
+        // load CSV and initialize
+        async function loadDataFromCSV({ force=false } = {}) {
+          pageSummary.innerText = "Memuat data...";
+          try {
+            const url = force ? sheetCSV + (sheetCSV.includes('?') ? '&_ts=' + Date.now() : '?_ts=' + Date.now()) : sheetCSV;
+            const res = await fetch(url, { cache: "no-store" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const txt = await res.text();
+
+            // quick check: jika sama dengan lastFetchedText -> skip parsing/render
+            if (!force && lastFetchedText !== null && txt === lastFetchedText) {
+              // no change
+              const now = new Date();
+              lastUpdatedLabel.innerText = `Terakhir diperiksa: ${now.toLocaleTimeString()}`;
+              pageSummary.innerText = `Tidak ada perubahan • Menampilkan ${filtered.length} data • Halaman ${currentPage}`;
+              return;
+            }
+
+            // parse CSV text
+            const parsed = parseCSV(txt);
+            lastFetchedText = txt;
+            dataGlobal = parsed;
+            filtered = dataGlobal.slice();
+            currentPage = 1;
+
+            // update UI
+            renderTable();
+            const now = new Date();
+            lastUpdatedLabel.innerText = `Terakhir diperbarui: ${now.toLocaleString()}`;
+          } catch (err) {
+            console.error("Gagal memuat CSV:", err);
+            pageSummary.innerText = "Gagal memuat data — cek bahwa sheet sudah di-publish dan link benar";
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:18px;color:#999">Gagal memuat data — cek bahwa sheet sudah di-publish dan link benar</td></tr>`;
+          }
+        }
+
+        // manual refresh button
+        btnRefresh.addEventListener("click", () => {
+          loadDataFromCSV({ force: true });
+        });
+
+        // start polling
+        function startPolling() {
+          if (pollTimer) clearInterval(pollTimer);
+          pollTimer = setInterval(() => {
+            loadDataFromCSV({ force: false });
+          }, pollIntervalMs);
+        }
+
+        // initial load
+        loadDataFromCSV({ force: true }).then(startPolling);
+
+        // expose helpers for debugging (opsional)
+        window.__rekap = { loadDataFromCSV, applyFilter, getState: () => ({ rowsPerPage, currentPage, total: filtered.length }) };
+      })();
+    </script>
+  </body>
+</html>
