@@ -824,13 +824,12 @@
           <div class="login-sub">Silakan masuk atau buat akun terlebih dahulu untuk mengakses halaman ini.</div>
 
           <label for="loginName" class="visually-hidden">Name</label>
-          <input id="loginName" class="login-field" type="text" placeholder="Enter your name" autocomplete="name">
-
-          <label for="loginEmail" class="visually-hidden">E-mail</label>
-          <input id="loginEmail" class="login-field" type="email" placeholder="Enter your email address" autocomplete="email">
+            <input id="loginName" class="login-field" type="text"
+                  placeholder="Enter your name" autocomplete="off">
 
           <label for="loginPassword" class="visually-hidden">Password</label>
-          <input id="loginPassword" class="login-field" type="password" placeholder="Enter your password" autocomplete="password">
+            <input id="loginPassword" class="login-field" type="password"
+                  placeholder="Enter your password" autocomplete="new-password">
 
           <div class="login-cta">
             <button class="btn-primary-login" id="btnNext" onclick="handleNext()">Next</button>
@@ -876,21 +875,14 @@
         // Login handler using CSV from Google Sheet (tab "Akun")
         window.handleNext = function() {
           const name = document.getElementById('loginName').value.trim();
-          const email = document.getElementById('loginEmail').value.trim();
           const password = document.getElementById('loginPassword').value.trim();
 
           // basic validation
-          if(!name || !email || !password) {
-            msg.textContent = 'Nama, email, dan password wajib diisi.';
+          if(!name || !password) {
+            msg.textContent = 'Nama, dan password wajib diisi.';
             return;
           }
 
-          // simple email format check
-          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if(!re.test(email)) {
-            msg.textContent = 'Masukkan email yang valid.';
-            return;
-          }
 
           msg.textContent = 'Memeriksa akun...';
 
@@ -908,9 +900,8 @@
               }
 
               const header = lines[0].split(",").map(h => h.trim().toLowerCase());
-              // Determine column indices (name,email,password) - tolerant of ordering
+              // Determine column indices (name,password) - tolerant of ordering
               const idxName = header.indexOf('name') !== -1 ? header.indexOf('name') : (header.indexOf('nama') !== -1 ? header.indexOf('nama') : 0);
-              const idxEmail = header.indexOf('email') !== -1 ? header.indexOf('email') : (header.indexOf('e-mail') !== -1 ? header.indexOf('e-mail') : 1);
               const idxPassword = header.indexOf('password') !== -1 ? header.indexOf('password') : (header.indexOf('pwd') !== -1 ? header.indexOf('pwd') : 2);
               const idxRole = header.indexOf('role') !== -1 ? header.indexOf('role') : -1;
 
@@ -921,10 +912,9 @@
                 if(!lines[i].trim()) continue;
                 const cols = parseCSVLine(lines[i]);
                 const csvName = (cols[idxName] || '').replace(/^"|"$/g,'').trim();
-                const csvEmail = (cols[idxEmail] || '').replace(/^"|"$/g,'').trim();
                 const csvPassword = (cols[idxPassword] || '').replace(/^"|"$/g,'').trim();
 
-                if(csvName === name && csvEmail === email && csvPassword === password) {
+              if (csvName === name && csvPassword === password) {
                   found = true;
                   if(idxRole !== -1) foundRole = (cols[idxRole] || '').replace(/^"|"$/g,'').trim();
                   break;
@@ -944,7 +934,7 @@
                     console.info('Login berhasil:', name);
                 
 
-                console.info('Login berhasil:', name, email, foundRole || 'role:none');
+                console.info('Login berhasil:', name, foundRole || 'role:none');
               } else {
                 msg.textContent = 'Akun tidak ditemukan atau kata sandi salah.';
               }
